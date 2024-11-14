@@ -1,83 +1,64 @@
-const form = document.getElementById('upload-form');
-const canvas = document.getElementById('pdf-canvas');
-const ctx = canvas.getContext('2d');
-const prevButton = document.getElementById('prev-page');
-const nextButton = document.getElementById('next-page');
-const pageNumDisplay = document.getElementById('page-num');
-const pageCountDisplay = document.getElementById('page-count');
-
+const pdfUrl = 'test_pdf.pdf';
 let pdfDoc = null;
 let pageNum = 1;
-let totalPages = 0;
+let role = 'viewer';
 
-// Set up pdf.js worker source
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.worker.min.js';
+const socket = new WebSocket('ws://localhost:3000');
+const canvas = document.getElementById('pdf-canvas');
+const ctx = canvas.getContext('2d');
+const pageNumberDisplay = document.getElementById('page-number');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
 
-// Handle form submission for PDF upload
-form.onsubmit = async (e) => {
-  e.preventDefault();
-  const fileInput = document.getElementById('pdf-upload');
-  const file = fileInput.files[0];
+// Load PDF
+pdfjsLib.getDocument(pdfUrl).promise.then((pdf) => {
+  pdfDoc = pdf;
+  renderPage(pageNum);
+});
 
-  if (!file) {
-    alert("Please select a PDF file.");
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('pdf', file);
-
-  // Upload PDF to the server
-  const response = await fetch('/upload', {
-    method: 'POST',
-    body: formData
-  });
-
-  const result = await response.json();
-  if (result.filePath) {
-    loadPDF(result.filePath);
-  } else {
-    alert("Failed to upload PDF.");
-  }
-};
-
-// Load and display the PDF
-function loadPDF(url) {
-  pdfjsLib.getDocument(url).promise.then((pdf) => {
-    pdfDoc = pdf;
-    totalPages = pdf.numPages;
-    pageCountDisplay.textContent = totalPages;
-    renderPage(pageNum);
-  }).catch((error) => {
-    console.error("Error loading PDF:", error);
-  });
-}
-
-// Render a specific page of the PDF
+// Render page
 function renderPage(num) {
   pdfDoc.getPage(num).then((page) => {
     const viewport = page.getViewport({ scale: 1.5 });
     canvas.height = viewport.height;
     canvas.width = viewport.width;
 
-    // Render page into the canvas context
-    const renderContext = { canvasContext: ctx, viewport: viewport };
-    page.render(renderContext).then(() => {
-      // Update page counters after rendering
-      pageNumDisplay.textContent = num;
-    });
+    page.render({ canvasContext: ctx, viewport: viewport });
+    pageNumberDisplay.textContent = `Page ${num} / ${pdfDoc.numPages}`;
+    pageNum = num;
   });
 }
 
-// Event listeners for slider controls
-prevButton.addEventListener('click', () => {
-  if (pageNum <= 1) return;
-  pageNum--;
-  renderPage(pageNum);
+// Handle navigation
+prevBtn.addEventListener('click', () => {
+  if (pageNum > 1 && role === 'admin') {
+    changePage(pageNum - 1);
+  }
+});
+nextBtn.addEventListener('click', () => {
+  if (pageNum < pdfDoc.numPages && role === 'admin') {
+    changePage(pageNum + 1);
+  }
 });
 
-nextButton.addEventListener('click', () => {
-  if (pageNum >= totalPages) return;
-  pageNum++;
-  renderPage(pageNum);
-});
+// Change page and broadcast if admin
+function changePage(num) {
+  pageNum = num;
+  renderPage(num);
+  socket.send(JSON.stringify({ type: 'changePage', page: num }));
+}
+
+// WebSocket events
+socket.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+
+  if (data.role) {
+    role = data.role;
+    prevBtn.disabled = role !== 'admin';
+    nextBtn.disabled = role !== 'admin';
+  }
+
+  if (data.type === 'pageUpdate') {
+    renderPage(data.page);
+  }
+};
