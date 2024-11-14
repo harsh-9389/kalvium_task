@@ -8,6 +8,7 @@
 </head>
 <body>
 <div id="container">
+  <input type="file" id="file-input" accept="application/pdf">
   <canvas id="pdf-canvas"></canvas>
   <div id="controls">
     <button id="prev" disabled>Previous</button>
@@ -16,5 +17,18 @@
   </div>
 </div>
 <script src="script.js"></script>
+<script>
+  // Show the file input only if the user is an admin
+  window.addEventListener('load', () => {
+    // Wait until role is assigned by WebSocket
+    const socket = new WebSocket('ws://localhost:3000');
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.role === 'admin') {
+        document.getElementById('file-input').style.display = 'block';
+      }
+    };
+  });
+</script>
 </body>
 </html>
