@@ -92,7 +92,7 @@ nextBtn.addEventListener('click', () => {
 function changePage(num) {
   pageNum = num;
   renderPage(num);
-  if(role === 'admin') socket.send(JSON.stringify({ type: 'changePage', page: num }));
+  if (role === 'admin') socket.send(JSON.stringify({ type: 'changePage', page: num }));
 }
 
 // WebSocket events

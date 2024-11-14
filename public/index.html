@@ -6,38 +6,51 @@
     <title>PDF Co-Viewer</title>
     <!-- <link rel="stylesheet" href="styles.css" /> -->
     <link rel="stylesheet" href="index.css" />
-    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
   </head>
+
   <body>
-    <div id="container">
-      <h1 class="text-yellow-800">PDF Co-Viewer</h1>
-      <input
-        title="input"
-        type="file"
-        id="file-input"
-        accept="application/pdf"
-      />
-      <canvas id="pdf-canvas"></canvas>
-      <div id="controls">
-        <button id="prev" disabled>Previous</button>
-        <span id="page-number"></span>
-        <button id="next" disabled>Next</button>
+    <div id="container" class="flex">
+      <div id="left" class="content-center">
+        <h1 class="text-yellow-800 text-4xl font-serif text-center">
+          PDF Co-Viewer
+        </h1>
+
+        <input
+          title="input"
+          type="file"
+          id="file-input"
+          accept="application/pdf"
+          class="w-4/5 ml-8 mt-4 p-2 rounded-lg bg-yellow-300 text-green-800"
+        />
+
+        <div id="controls" class="w-4/5 ml-8 mt-4 p-2 rounded-lg bg-yellow-300">
+          <button
+            id="prev"
+            class="bg-blue-400 p-2 rounded-lg text-gray-100 w-1/3"
+            disabled
+          >
+            Previous
+          </button>
+
+          <button
+            id="next"
+            class="bg-blue-400 p-2 rounded-lg text-gray-100 w-1/4 ml-2"
+            disabled
+          >
+            Next
+          </button>
+
+          <span id="page-number" class="text-gray-700 ml-2"></span>
+        </div>
       </div>
+
+      <canvas
+        id="pdf-canvas"
+        class="h-screen w-3/5 ml-12 border-4 border-solid border-red-400 bg-yellow-200"
+      ></canvas>
     </div>
     <script src="script.js"></script>
-    <script>
-      // Show the file input only if the user is an admin
-      window.addEventListener("load", () => {
-        // Wait until role is assigned by WebSocket
-        const socket = new WebSocket("ws://localhost:3000");
-        socket.onmessage = (event) => {
-          const data = JSON.parse(event.data);
-          if (data.role === "admin") {
-            document.getElementById("file-input").style.display = "block";
-          }
-        };
-      });
-    </script>
   </body>
 </html>
