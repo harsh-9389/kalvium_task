@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PDF Viewer with Slider</title>
+  </head>
+  <body>
+    <h1>PDF Viewer</h1>
+    <form id="upload-form">
+      <input type="file" id="pdf-upload" accept="application/pdf" />
+      <button type="submit">Upload PDF</button>
+    </form>
+
+    <!-- Slider Controls and PDF Canvas -->
+    <div id="pdf-slider">
+      <button id="prev-page">Previous</button>
+      <canvas id="pdf-canvas"></canvas>
+      <button id="next-page">Next</button>
+    </div>
+
+    <div id="page-info">
+      <span
+        >Page: <span id="page-num">1</span> /
+        <span id="page-count">0</span></span
+      >
+    </div>
+
+    <!-- Include pdf.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>
+    <script src="/script.js"></script>
+  </body>
+</html>
