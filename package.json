@@ -16,5 +16,8 @@
     "redis": "^4.7.0",
     "socket.io": "^4.8.1",
     "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.15"
   }
 }
